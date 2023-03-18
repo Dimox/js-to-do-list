@@ -1,4 +1,4 @@
-export default function () {
+const favicon = () => {
   const todo = JSON.parse(localStorage.getItem('todo')) || [];
   const counter = todo.filter(item => item.checked !== true).length;
 
@@ -37,4 +37,6 @@ export default function () {
     link.href = canvas.toDataURL();
     document.querySelector('head').appendChild(link);
   };
-}
+};
+
+export default favicon;

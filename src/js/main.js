@@ -1,7 +1,7 @@
 'use strict';
 
 import Todo from './modules/todo';
-import Favicon from './modules/favicon';
+import favicon from './modules/favicon';
 
-new Todo('.todo__list');
-Favicon();
+new Todo();
+favicon();
