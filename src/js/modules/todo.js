@@ -7,85 +7,87 @@ import setInputAutoHeight from './set-input-auto-height';
 import updateFavicon from './favicon';
 
 export default class Todo {
-  constructor(element) {
-    this.data = JSON.parse(localStorage.getItem('todo')) || [];
+  constructor() {
+    const todo = this;
 
-    this.todo = document.querySelector('.todo');
-    this.todoList = document.querySelector(element);
+    todo.data = JSON.parse(localStorage.getItem('todo')) || [];
 
-    this.actionsPanel = document.querySelector('.todo__actions');
-    this.toggleAll = document.querySelector('.todo__toggle-all .checkbox__input');
-    this.deleteDone = document.querySelector('.todo__delete-done');
+    todo.todoEl = document.querySelector('.todo');
+    todo.todoList = document.querySelector('.todo__list');
 
-    this.addForm = document.querySelector('.todo__form');
-    this.input = this.addForm.elements['text'];
-    this.submit = this.addForm.elements['submit'];
+    todo.actionsPanel = document.querySelector('.todo__actions');
+    todo.toggleAll = document.querySelector('.todo__toggle-all .checkbox__input');
+    todo.deleteDone = document.querySelector('.todo__delete-done');
 
-    this.todoEdit = document.querySelector('.todo-edit');
-    this.todoEditForm = document.querySelector('.todo-edit__form');
-    this.todoEditInput = document.querySelector('.todo-edit__input');
+    todo.addForm = document.querySelector('.todo__form');
+    todo.input = todo.addForm.elements['text'];
+    todo.submit = todo.addForm.elements['submit'];
 
-    this.testData = document.querySelector('.test-data');
-    this.testDataBtn = document.querySelector('.test-data__btn');
+    todo.todoEdit = document.querySelector('.todo-edit');
+    todo.todoEditForm = document.querySelector('.todo-edit__form');
+    todo.todoEditInput = document.querySelector('.todo-edit__input');
 
-    this.toggleTestDataBtn();
-    this.render();
+    todo.testData = document.querySelector('.test-data');
+    todo.testDataBtn = document.querySelector('.test-data__btn');
 
-    Sortable.create(this.todoList, {
+    todo.toggleTestDataBtn();
+    todo.render();
+
+    Sortable.create(todo.todoList, {
       handle: '.todo__move',
       animation: 250,
       ghostClass: 'todo__move--ghost',
       onEnd: event => {
-        const data = this.data;
+        const data = todo.data;
         const oldItem = data[event.oldIndex];
         const newItem = data[event.newIndex];
-        this.data[event.newIndex] = oldItem;
-        this.data[event.oldIndex] = newItem;
-        this.sortByCheckedUnchecked();
-        this.saveDataToStorage();
-        this.render();
+        todo.data[event.newIndex] = oldItem;
+        todo.data[event.oldIndex] = newItem;
+        todo.sortByCheckedUnchecked();
+        todo.saveDataToStorage();
+        todo.render();
       },
     });
 
     // Event Handlers
     document.addEventListener('click', event => {
       const element = event.target;
-      if (element === this.testDataBtn) {
+      if (element === todo.testDataBtn) {
         const isTestData = true;
-        this.addTodoItem(isTestData);
+        todo.addTodoItem(isTestData);
       }
       if (element.matches('.todo__delete-done')) {
         const checkedItems = document.querySelectorAll('.todo__item--done');
         for (const item of checkedItems) {
           const id = item.dataset.id;
-          this.removeTodoItem(id);
+          todo.removeTodoItem(id);
         }
-        this.toggleCheckboxAll();
-        this.toggleDeleteDone();
+        todo.toggleCheckboxAll();
+        todo.toggleDeleteDone();
       }
       if (element.matches('.todo__expand')) {
-        this.toggleExpandTodoItem(element);
+        todo.toggleExpandTodoItem(element);
       }
       if (element.matches('.todo__menu-toggle')) {
-        this.toggleTodoItemMenu(element);
+        todo.toggleTodoItemMenu(element);
       }
       if (element.matches('.todo__edit')) {
-        this.openTodoItemEditModal(element);
+        todo.openTodoItemEditModal(element);
         document.querySelector('.menu-active').classList.remove('menu-active');
       }
       if (element.matches('.todo__delete')) {
         const id = element.dataset.id;
-        this.removeTodoItem(id);
+        todo.removeTodoItem(id);
       }
-      this.closeTodoItemMenu(element);
+      todo.closeTodoItemMenu(element);
       if (element.closest('.todo-edit__close') || element.matches('.todo-edit__save')) {
-        this.closeTodoItemEditModal();
+        todo.closeTodoItemEditModal();
       }
     });
 
     document.addEventListener('mousedown', event => {
       if (event.target.matches('.todo-edit')) {
-        this.closeTodoItemEditModal();
+        todo.closeTodoItemEditModal();
       }
     });
 
@@ -93,84 +95,86 @@ export default class Todo {
       const element = event.target;
       if (element.matches('.checkbox__input')) {
         if (element.closest('.todo__toggle-all')) {
-          this.onChangeCheckboxAll(element);
+          todo.onChangeCheckboxAll(element);
           updateFavicon();
         } else {
-          this.onChangeCheckbox(element);
+          todo.onChangeCheckbox(element);
         }
       }
     });
 
     document.addEventListener('keydown', event => {
       const element = event.target;
-      if (this.todoEdit.matches('.active') && event.code === 'Escape') {
-        this.closeTodoItemEditModal();
+      if (todo.todoEdit.matches('.active') && event.code === 'Escape') {
+        todo.closeTodoItemEditModal();
       }
-      if (event.target === this.input) {
+      if (event.target === todo.input) {
         if (event.code == 'Enter' && !event.ctrlKey) {
-          this.onSubmitNewTodo(event);
+          todo.onSubmitNewTodo(event);
         } else if (event.code == 'Enter' && event.ctrlKey) {
-          this.input.value += '\n';
+          todo.input.value += '\n';
           setInputAutoHeight(element);
         }
       }
-      if (event.target === this.todoEditInput) {
+      if (event.target === todo.todoEditInput) {
         if (event.ctrlKey && event.code == 'Enter') {
-          this.onSaveTodoItem(event);
+          todo.onSaveTodoItem(event);
         }
         if (event.ctrlKey && event.code == 'KeyB') {
           event.preventDefault();
           const selectedText = window.getSelection().toString();
           const boldSelectedText = `<b>${selectedText}</b>`;
-          this.todoEditInput.value = this.todoEditInput.value.replace(selectedText, boldSelectedText);
+          todo.todoEditInput.value = todo.todoEditInput.value.replace(selectedText, boldSelectedText);
         }
       }
     });
 
     document.addEventListener('input', event => {
       const element = event.target;
-      if (element === this.input) {
+      if (element === todo.input) {
         setInputAutoHeight(element);
       }
     });
 
     document.addEventListener('focusin', event => {
       const element = event.target;
-      if (element === this.input) {
-        this.todo.classList.add('todo--focus-within');
+      if (element === todo.input) {
+        todo.todoEl.classList.add('todo--focus-within');
       }
     });
 
     document.addEventListener('focusout', event => {
       const element = event.target;
-      if (element === this.input) {
-        this.todo.classList.remove('todo--focus-within');
+      if (element === todo.input) {
+        todo.todoEl.classList.remove('todo--focus-within');
       }
     });
 
     document.addEventListener('submit', event => {
       const element = event.target;
-      if (element === this.addForm) {
-        this.onSubmitNewTodo(event);
+      if (element === todo.addForm) {
+        todo.onSubmitNewTodo(event);
       }
-      if (element === this.todoEditForm) {
-        this.onSaveTodoItem(event);
+      if (element === todo.todoEditForm) {
+        todo.onSaveTodoItem(event);
       }
     });
     // end Event Handlers
   }
 
   onRendered() {
-    this.toggleActionsPanel();
-    this.toggleCheckboxAll();
-    this.toggleDeleteDone();
+    const todo = this;
+    todo.toggleActionsPanel();
+    todo.toggleCheckboxAll();
+    todo.toggleDeleteDone();
   }
 
   toggleActionsPanel() {
-    if (this.data.length > 0) {
-      this.actionsPanel.classList.add('todo__actions--visible');
+    const todo = this;
+    if (todo.data.length > 0) {
+      todo.actionsPanel.classList.add('todo__actions--visible');
     } else {
-      this.actionsPanel.classList.remove('todo__actions--visible');
+      todo.actionsPanel.classList.remove('todo__actions--visible');
     }
   }
 
@@ -199,87 +203,96 @@ export default class Todo {
   }
 
   openTodoItemEditModal(element) {
+    const todo = this;
     const id = element.dataset.id;
-    const todoItem = this.data.find(item => item.id === id);
-    this.todoEdit.classList.add('active');
-    this.todoEdit.dataset.id = id;
-    this.todoEditInput.value = todoItem.text;
+    const todoItem = todo.data.find(item => item.id === id);
+    todo.todoEdit.classList.add('active');
+    todo.todoEdit.dataset.id = id;
+    todo.todoEditInput.value = todoItem.text;
     setTimeout(() => {
-      this.todoEditInput.focus();
+      todo.todoEditInput.focus();
     }, 100);
   }
 
   closeTodoItemEditModal() {
-    this.todoEdit.classList.remove('active');
+    const todo = this;
+    todo.todoEdit.classList.remove('active');
   }
 
   onSubmitNewTodo(e) {
+    const todo = this;
     e.preventDefault();
-    if (this.input.value !== '') {
-      this.addTodoItem();
-      this.input.style.height = 'auto';
+    if (todo.input.value !== '') {
+      todo.addTodoItem();
+      todo.input.style.height = 'auto';
     }
   }
 
   saveDataToStorage() {
-    localStorage.setItem('todo', JSON.stringify(this.data));
+    const todo = this;
+    localStorage.setItem('todo', JSON.stringify(todo.data));
   }
 
   async addTodoItem(isTestData = false) {
+    const todo = this;
     if (isTestData) {
-      this.data = await testData();
+      todo.data = await testData();
     } else {
-      this.data.push({
+      todo.data.push({
         id: generateUniqueId(),
-        text: this.input.value,
+        text: todo.input.value,
         date: new Date(),
         checked: false,
       });
     }
-    this.sortByCheckedUnchecked();
-    this.saveDataToStorage();
-    this.render();
-    this.addForm.reset();
-    this.toggleTestDataBtn();
+    todo.sortByCheckedUnchecked();
+    todo.saveDataToStorage();
+    todo.render();
+    todo.addForm.reset();
+    todo.toggleTestDataBtn();
     updateFavicon();
   }
 
   removeTodoItem(id) {
+    const todo = this;
     const item = document.querySelector(`.todo__item[data-id="${id}"]`);
     item.parentNode.removeChild(item);
-    this.data = this.data.filter(item => item.id != id);
-    this.saveDataToStorage();
-    this.toggleTestDataBtn();
-    this.toggleActionsPanel();
+    todo.data = todo.data.filter(item => item.id != id);
+    todo.saveDataToStorage();
+    todo.toggleTestDataBtn();
+    todo.toggleActionsPanel();
     updateFavicon();
   }
 
   toggleTestDataBtn() {
-    if (this.data.length < 1) {
-      this.testData.classList.add('show');
+    const todo = this;
+    if (todo.data.length < 1) {
+      todo.testData.classList.add('show');
     } else {
-      this.testData.classList.remove('show');
+      todo.testData.classList.remove('show');
     }
   }
 
   toggleCheckboxAll() {
+    const todo = this;
     const checkedItems = document.querySelectorAll('.checkbox:not(.todo__toggle-all) .checkbox__input:checked');
-    if (this.data.length > 0 && checkedItems.length === this.data.length) {
-      this.toggleAll.checked = !this.toggleAll.checked;
+    if (todo.data.length > 0 && checkedItems.length === todo.data.length) {
+      todo.toggleAll.checked = !todo.toggleAll.checked;
     }
-    if (this.data.length === 0) {
-      this.toggleAll.checked = false;
+    if (todo.data.length === 0) {
+      todo.toggleAll.checked = false;
     }
   }
 
   onChangeCheckboxAll(element) {
+    const todo = this;
     const checkboxes = document.querySelectorAll('.checkbox:not(.todo__toggle-all) .checkbox__input');
     if (element.matches(':checked')) {
       checkboxes.forEach(checkbox => {
         const id = checkbox.dataset.id;
         if (!checkbox.matches(':checked')) {
           checkbox.checked = !checkbox.checked;
-          this.data.map(item => {
+          todo.data.map(item => {
             if (item.id === id) {
               item.checked = true;
             }
@@ -291,7 +304,7 @@ export default class Todo {
       checkboxes.forEach(checkbox => {
         const id = checkbox.dataset.id;
         checkbox.checked = !checkbox.checked;
-        this.data.map(item => {
+        todo.data.map(item => {
           if (item.id === id) {
             item.checked = false;
           }
@@ -299,69 +312,74 @@ export default class Todo {
         document.querySelector(`.todo__item[data-id="${id}"]`).classList.remove('todo__item--done');
       });
     }
-    this.saveDataToStorage();
-    this.toggleDeleteDone();
+    todo.saveDataToStorage();
+    todo.toggleDeleteDone();
   }
 
   onChangeCheckbox(element) {
+    const todo = this;
     const id = element.dataset.id;
-    const checked = !this.data.find(item => item.id === id).checked;
+    const checked = !todo.data.find(item => item.id === id).checked;
 
-    this.data.map(item => {
+    todo.data.map(item => {
       if (item.id === id) {
         item.checked = checked;
       }
     });
-    this.sortByCheckedUnchecked();
+    todo.sortByCheckedUnchecked();
 
     if (checked === false) {
-      this.toggleAll.checked = false;
+      todo.toggleAll.checked = false;
     }
 
     setTimeout(() => {
-      this.render();
+      todo.render();
     }, 350);
 
-    this.saveDataToStorage();
+    todo.saveDataToStorage();
     document.querySelector(`.todo__item[data-id="${id}"]`).classList.toggle('todo__item--done');
 
-    this.toggleDeleteDone();
+    todo.toggleDeleteDone();
     updateFavicon();
   }
 
   toggleDeleteDone() {
+    const todo = this;
     const checkedItems = document.querySelectorAll('.todo__item--done');
     if (checkedItems.length > 0) {
-      this.deleteDone.style.display = 'block';
+      todo.deleteDone.style.display = 'block';
     } else {
-      this.deleteDone.style.display = 'none';
+      todo.deleteDone.style.display = 'none';
     }
-    this.toggleActionsPanel();
+    todo.toggleActionsPanel();
   }
 
   sortByCheckedUnchecked() {
-    const data = this.data;
+    const todo = this;
+    const data = todo.data;
     const checkedItems = data.filter(item => item.checked === true);
     const uncheckedItems = data.filter(item => item.checked !== true);
-    this.data = [...uncheckedItems, ...checkedItems];
+    todo.data = [...uncheckedItems, ...checkedItems];
   }
 
   onSaveTodoItem(event) {
+    const todo = this;
     event.preventDefault();
-    const id = this.todoEdit.dataset.id;
-    this.data.map(item => {
+    const id = todo.todoEdit.dataset.id;
+    todo.data.map(item => {
       if (item.id === id) {
-        item.text = this.todoEditInput.value;
+        item.text = todo.todoEditInput.value;
       }
     });
-    this.saveDataToStorage();
-    this.closeTodoItemEditModal(event);
-    this.render();
+    todo.saveDataToStorage();
+    todo.closeTodoItemEditModal(event);
+    todo.render();
   }
 
   render() {
+    const todo = this;
     let html = '';
-    for (const item of this.data) {
+    for (const item of todo.data) {
       const id = item.id;
       let text = item.text;
       const date = new Date(item.date).toLocaleString('ru-RU', {
@@ -432,8 +450,8 @@ export default class Todo {
         </li>
       `;
     }
-    this.todoList.replaceChildren();
-    this.todoList.insertAdjacentHTML('beforeend', html);
-    this.onRendered();
+    todo.todoList.replaceChildren();
+    todo.todoList.insertAdjacentHTML('beforeend', html);
+    todo.onRendered();
   }
 }
