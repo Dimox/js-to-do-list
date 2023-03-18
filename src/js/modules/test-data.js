@@ -2,7 +2,7 @@ import generateUniqueId from './generate-unique-id';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-export default async function () {
+const testData = async () => {
   document.body.classList.add('loading');
 
   const todos = [];
@@ -30,4 +30,6 @@ export default async function () {
   document.body.classList.remove('loading');
 
   return todos;
-}
+};
+
+export default testData;
